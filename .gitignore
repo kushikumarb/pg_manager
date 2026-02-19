@@ -1,0 +1,30 @@
+# IDE / System files
+.vscode/
+.idea/
+.DS_Store
+*.swp
+
+# Environment Secrets
+.env
+backend/.env
+frontend/.env
+frontend/.env.local
+
+# Node.js (Frontend)
+frontend/node_modules/
+frontend/dist/
+frontend/.eslintcache
+
+# Go (Backend)
+backend/bin/
+backend/main*
+backend/pg-manager-backend
+backend/vendor/
+
+# Docker
+.docker/
+*/data/
+postgres_data/
+
+# App generated files
+backend/public/receipts/*.pdf
