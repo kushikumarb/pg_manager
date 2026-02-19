@@ -18,6 +18,11 @@ type AppConfig struct {
 	Environment string
 	BaseURL     string
 
+	//Razorpay Credentials
+	RazorpayKeyID      string
+	RazorpayKeySecret  string
+	RazorpayWebhookKey string
+
 	// Twilio Credentials
 	TwilioSID        string
 	TwilioAuthToken  string
@@ -45,6 +50,10 @@ func LoadConfig() {
 		JWTSecret:   getEnv("JWT_SECRET", "placeholder_for_dev_only"),
 		Environment: getEnv("APP_ENV", "development"),
 		BaseURL:     getEnv("BASE_URL", "http://localhost:8080"),
+
+		RazorpayKeyID:      getEnv("RAZORPAY_KEY_ID", ""),
+		RazorpayKeySecret:  getEnv("RAZORPAY_KEY_SECRET", ""),
+		RazorpayWebhookKey: getEnv("RAZORPAY_WEBHOOK_SECRET", ""),
 
 		TwilioSID:        getEnv("TWILIO_ACCOUNT_SID", ""),
 		TwilioAuthToken:  getEnv("TWILIO_AUTH_TOKEN", ""),

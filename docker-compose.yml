@@ -29,8 +29,15 @@ services:
       DB_PORT: 5432
       JWT_SECRET: ${JWT_SECRET}
       APP_ENV: ${APP_ENV}
-      GIN_MODE: release # Runs Gin in high-performance mode
+      GIN_MODE: release
       TZ: Asia/Kolkata
+      # Razorpay Credentials
+      RAZORPAY_KEY_ID: ${RAZORPAY_KEY_ID}
+      RAZORPAY_KEY_SECRET: ${RAZORPAY_KEY_SECRET}
+      # Twilio Credentials
+      TWILIO_ACCOUNT_SID: ${TWILIO_ACCOUNT_SID}
+      TWILIO_AUTH_TOKEN: ${TWILIO_AUTH_TOKEN}
+      TWILIO_FROM_NUMBER: ${TWILIO_FROM_NUMBER}
     ports:
       - "8080:8080"
 

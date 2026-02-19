@@ -99,32 +99,36 @@ func VerifyTenantOTP(tenantID uint, inputOTP string) error {
 		return errors.New("invalid OTP: verification failed")
 	}
 
-	// Calculate Initial Total: Monthly Rent + Security Deposit
-	initialDue := profile.MonthlyRent + profile.Room.Deposit
+	// Using your struct's 'Deposit' and 'MonthlyRent' fields
+	initialDue := profile.MonthlyRent + profile.Deposit
 
 	updates := map[string]interface{}{
 		"is_verified": true,
 		"status":      "active",
-		"balance":     initialDue, // Set initial balance
+		"balance":     initialDue,
 	}
 
 	if err := config.DB.Model(&profile).Updates(updates).Error; err != nil {
 		return err
 	}
 
-	// 🔗 GENERATE INITIAL LINK (Rent + Deposit)
-	paymentLink := utils.GenerateRazorpayLink(profile.UserID, initialDue, "Initial Rent + Deposit")
+	// Generate Link using MailID
+	paymentLink, err := utils.GenerateRazorpayLink(profile.UserID, profile.MailID, initialDue, "Initial Rent + Deposit")
+	if err != nil {
+		log.Printf("⚠️ Razorpay Error: %v", err)
+		paymentLink = "[Link Error - Contact Admin]"
+	}
 
-	// TERMINAL LOGGING (Simulating WhatsApp)
+	// TERMINAL LOGGING
 	log.Printf("\n--- WHATSAPP SIMULATION (OTP VERIFIED) ---")
 	log.Printf("To: %s (%s)", profile.Name, profile.PhoneNumber)
 	log.Printf("Message: ✅ Admission Confirmed! Your initial total (Rent+Deposit) is ₹%.2f. Pay here: %s", initialDue, paymentLink)
 	log.Printf("------------------------------------------\n")
 
-	// Commented out: WhatsApp notification
+	// KEEPING THIS COMMENTED AS REQUESTED
 	/*
-		welcomeMsg := fmt.Sprintf("✅ *Admission Confirmed!*\n🔗 Pay here: %s", paymentLink)
-		utils.SendWhatsAppMessage(profile.PhoneNumber, welcomeMsg)
+	   welcomeMsg := fmt.Sprintf("✅ *Admission Confirmed!*\n🔗 Pay here: %s", paymentLink)
+	   utils.SendWhatsAppMessage(profile.PhoneNumber, welcomeMsg)
 	*/
 
 	return nil

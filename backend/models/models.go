@@ -121,6 +121,7 @@ type Payment struct {
 	PaymentType string    `json:"payment_type"` // e.g., "Rent", "Deposit", "Maintenance"
 	Method      string    `json:"method"`       // e.g., "Cash", "UPI", "Bank Transfer"
 	Date        time.Time `json:"date"`
+	CreatedAt   time.Time `json:"created_at"`
 }
 
 type ArchivedTenant struct {

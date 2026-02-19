@@ -13,7 +13,6 @@ func ProcessDailyBilling() {
 	var tenants []models.TenantProfile
 	today := time.Now().Truncate(24 * time.Hour)
 
-	// 1. Find active tenants due for billing
 	if err := config.DB.Where("status = ? AND next_billing_date <= ?", "active", today).Find(&tenants).Error; err != nil {
 		log.Printf("Error fetching due tenants: %v", err)
 		return
@@ -22,13 +21,12 @@ func ProcessDailyBilling() {
 	for _, tenant := range tenants {
 		tx := config.DB.Begin()
 
-		// 2. Update Balance and Next Billing Date (30 days)
 		newBalance := tenant.Balance + tenant.MonthlyRent
 		newNextBillingDate := tenant.NextBillingDate.AddDate(0, 0, 30)
 
 		updates := map[string]interface{}{
 			"balance":           newBalance,
-			"last_billing_date": today,
+			"last_billed_date":  &today, // Using pointer as per your struct
 			"next_billing_date": newNextBillingDate,
 		}
 
@@ -38,10 +36,14 @@ func ProcessDailyBilling() {
 		}
 		tx.Commit()
 
-		// 3. Generate Simulated Link
-		paymentLink := utils.GenerateRazorpayLink(tenant.UserID, newBalance,"Monthly-Rent")
+		// Generate Link using MailID
+		paymentLink, err := utils.GenerateRazorpayLink(tenant.UserID, tenant.MailID, newBalance, "Monthly Rent")
+		if err != nil {
+			log.Printf("⚠️ Billing link failed for %s: %v", tenant.Name, err)
+			paymentLink = "[Link Unavailable]"
+		}
 
-		// 4. TERMINAL LOGGING instead of WhatsApp
+		// TERMINAL LOGGING
 		fmt.Println("\n--- [TERMINAL WHATSAPP SIMULATION: MONTHLY BILL] ---")
 		fmt.Printf("To: %s (%s)\n", tenant.Name, tenant.PhoneNumber)
 		fmt.Printf("Message: Namaste %s! 🏠\n"+
@@ -49,8 +51,10 @@ func ProcessDailyBilling() {
 			"Click here to pay: %s\n",
 			tenant.Name, tenant.MonthlyRent, newBalance, paymentLink)
 
-		/* Commented out for now
-		utils.SendWhatsAppMessage(tenant.PhoneNumber, message)
+		// KEEPING THIS COMMENTED AS REQUESTED
+		/*
+		   message := fmt.Sprintf("Namaste %s! Your rent is due. Pay here: %s", tenant.Name, paymentLink)
+		   utils.SendWhatsAppMessage(tenant.PhoneNumber, message)
 		*/
 	}
 }
